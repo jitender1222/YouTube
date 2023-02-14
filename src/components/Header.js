@@ -1,9 +1,36 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { toogleMenu } from '../utils/appSlice';
+import { YOUTUBE_SEARCH_API } from '../utils/constant';
+import { findItem } from './VideoConatiner';
+
 
 const Header = () => {
 
+  const [searchQuery,setSearchQuery]=useState("");
+  const [suggestions,setSuggestions]=useState([]);
+  const [showSuggestions,setShowSuggestions]=useState(false);
+
+  const search=findItem(searchQuery);
+
+  useEffect(()=>{
+
+    const timer=setTimeout(()=> setSearchSuggestions(),200);
+
+    return ()=>{
+      clearInterval(timer);
+    };
+
+  },[searchQuery]);
+
+  const setSearchSuggestions= async ()=>{
+
+    const Promise=await fetch(YOUTUBE_SEARCH_API+searchQuery);
+    const json=await Promise.json();
+    setSuggestions(json[1]);
+  }
+
+  console.log(suggestions);
   const dispatch=useDispatch();
 
   const toogle=()=>{
@@ -23,8 +50,26 @@ const Header = () => {
     </div>
 
     <div className="col-span-10 mt-2 px-32">
-      <input type="text"  placeholder='Search......' className='w-1/2 border-gray-500 border-2 rounded-l-full p-2'/>
-      <button className='border-gray-500 border-2 rounded-r-full p-2 bg-gray-400'>🔍</button>
+      <div>
+      <input type="text"  placeholder='Search......' className='px-5 p-2 w-1/2 border-gray-500 border-2 rounded-l-full'
+      value={searchQuery}
+      onChange={(e)=> setSearchQuery(e.target.value)}
+      onBlur ={() =>  setShowSuggestions(false)}
+      onFocus={() =>  setShowSuggestions(true)}
+      />
+      <button className='border-gray-500 border-2 rounded-r-full p-2 bg-gray-400'
+      onClick={()=>search(searchQuery)}
+      >🔍</button>
+      </div>
+      {showSuggestions && (<div className='fixed py-2 px-5 w-[28rem] bg-white shadow-xl rounded-xl mt-2'>
+        <ul>
+          {
+            suggestions.map((s)=> <li className='py-2 shadow-sm hover:bg-gray-300 px-3 rounded-lg'>🔍{s}</li>)
+          }
+          
+        </ul>
+      </div>
+      )}
       </div>
 
     <div className="col-span-1">
